@@ -1,0 +1,40 @@
+Animated Progress Bar = 
+Var percentage = [Parameter Value]
+
+Var percentage_adjustment = FORMAT(percentage,"0.0%")
+
+Var animation = 
+    TRUNC(percentage * 100)
+
+Return
+
+"
+<style>
+  /* Progress bar container */
+    .progress-bar {
+     width: 99vw;
+        height: 95vh;
+      border: 1px solid #D3D3D3;
+      background-color:#F2f2f2;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    /* Progress bar filler */
+    .progress-bar-fill {
+      height: 100%;
+      background-image: linear-gradient(to right, #74CFFC, #236789);
+      border-radius: 4px;
+      animation: progress-animation 1s linear forwards;
+    }
+
+    /* Animation */
+    @keyframes progress-animation {
+      0% { width: 0%; }
+      100% { width:" & animation & "%; }
+    }
+  </style>
+  <div class='progress-bar'>
+    <div class='progress-bar-fill'></div>
+  </div>
+  "
