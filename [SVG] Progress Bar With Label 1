@@ -1,0 +1,51 @@
+Progress Bar with Label = 
+//Set image Height & Widt di visual DAX nya minimal 30 x 200 px
+VAR TotalBars = 10
+VAR Percentage = [YTD Utilisasi]
+VAR FilledBars = ROUND(Percentage * TotalBars, 0)
+VAR BarWidth = 20
+VAR BarHeight = 50
+VAR BarSpacing = 30
+VAR BorderRadius = 9
+VAR SVGWidth = 500
+VAR SVGHeight = 60
+
+// Conditional color
+VAR ColorFilled = 
+    SWITCH(
+        TRUE(),
+        Percentage > 0.80, "#00B050",
+        Percentage > 0.15, "#FFC000",
+        "#FF0000"
+    )
+
+VAR ColorEmpty = "#CCCCCC"
+
+// Text color yang sama dengan bar color
+VAR TextColor = "#8C8C8C"
+
+VAR SVGHeader = 
+    "<svg xmlns='http://www.w3.org/2000/svg' width='" & SVGWidth & "' height='" & SVGHeight & "' viewBox='0 0 " & SVGWidth & " " & SVGHeight & "'>"
+
+VAR AllBars = 
+    CONCATENATEX(
+        GENERATESERIES(1, TotalBars, 1),
+        VAR CurrentBar = [Value]
+        VAR XPosition = 2 + ((CurrentBar - 1) * BarSpacing)
+        VAR BarColor = IF(CurrentBar <= FilledBars, ColorFilled, ColorEmpty)
+        RETURN
+            "<rect x='" & XPosition & "' y='4' width='" & BarWidth & "' height='" & BarHeight & "' rx='" & BorderRadius & "' fill='" & BarColor & "'/>",
+        "",
+        [Value],
+        ASC
+    )
+
+// Tambahkan text label
+VAR PercentageText = 
+    "<text x='310' y='40' font-family='Segoe UI' font-size='40' font-weight='bold' fill='" & TextColor & "'>" 
+    & FORMAT(Percentage, "0.0%") & "</text>"
+
+VAR SVGFooter = "</svg>"
+
+RETURN
+    "data:image/svg+xml;utf8," & SVGHeader & AllBars & PercentageText & SVGFooter
