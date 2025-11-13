@@ -1,0 +1,245 @@
+LocationKPI_Card = 
+VAR _actual = 565468
+VAR _target = 658536
+
+
+
+-- Dynamic scaling
+VAR _scale_base = IF(_actual > _target, _actual * 1.15, _target)
+VAR _actual_pct = DIVIDE(_actual, _scale_base)
+VAR _target_pct = DIVIDE(_target, _scale_base)
+
+VAR _actual_pct_css = FORMAT(_actual_pct * 100, "0.00") & "%"
+VAR _target_pct_css = FORMAT(_target_pct * 100, "0.00") & "%"
+
+-- Formatting values
+VAR _formatted_actual = FORMAT(_actual, "#,##0")
+VAR _formatted_target = FORMAT(_target, "#,##0")
+VAR _diff = _actual - _target
+VAR _diff_text = FORMAT(_diff, "+#,##0;-#,##0;0")
+VAR _variance_pct = FORMAT(DIVIDE(_diff, _target) * 100, "+0.1%;-0.1%;0.0%")
+
+-- Status logic
+VAR _performance_status =
+    IF(
+        _actual >= _target, "exceeded",
+        IF(_actual >= _target * 0.8, "on-track", "behind")
+    )
+
+VAR _status_color = SWITCH(
+    _performance_status,
+    "exceeded", "#059669",
+    "on-track", "#0891B2",
+    "behind", "#DC2626"
+)
+
+VAR _fill_gradient = SWITCH(
+    _performance_status,
+    "exceeded", "linear-gradient(135deg, #10B981 0%, #059669 50%, #047857 100%)",
+    "on-track", "linear-gradient(135deg, #0EA5E9 0%, #0284C7 50%, #0369A1 100%)",
+    "behind", "linear-gradient(135deg, #F59E0B 0%, #D97706 50%, #B45309 100%)"
+)
+
+VAR _status_bg = SWITCH(
+    _performance_status,
+    "exceeded", "#ECFDF5",
+    "on-track", "#F0F9FF",
+    "behind", "#FEF3C7"
+)
+
+VAR _status_text = SWITCH(
+    _performance_status,
+    "exceeded", "🎉 TARGET EXCEEDED",
+    "on-track", "📈 ON TRACK",
+    "behind", "⚡ NEEDS FOCUS"
+)
+
+RETURN
+"
+<div style='
+  width: 720px;
+  padding: 28px;
+  background: linear-gradient(145deg, #FEFEFE 0%, #F8FAFC 100%);
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  font-family: Segoe UI, Inter, system-ui, sans-serif;
+  color: #0F172A;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  position: relative;
+  overflow: hidden;
+'>
+
+  <div style='
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: " & _fill_gradient & ";
+  '></div>
+
+  <div style='
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+  '>
+    
+    <div style='
+      background: " & _status_bg & ";
+      color: " & _status_color & ";
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border: 1px solid " & _status_color & "20;
+    '>
+      " & _status_text & "
+    </div>
+  </div>
+
+  <div style='
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 28px;
+  '>
+    <div style='
+      background: #FFFFFF;
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid #F1F5F9;
+      text-align: center;
+    '>
+      <div style='font-size: 12px; color: #64748B; font-weight: 600; margin-bottom: 8px; text-transform: uppercase;'>📊 Actual</div>
+      <div style='font-size: 32px; font-weight: 800; color: " & _status_color & "; margin-bottom: 4px;'>" & _formatted_actual & "</div>
+      <div style='font-size: 13px; color: #64748B; font-weight: 500;'>Current Performance</div>
+    </div>
+
+    <div style='
+      background: #FFFFFF;
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid #F1F5F9;
+      text-align: center;
+    '>
+      <div style='font-size: 12px; color: #64748B; font-weight: 600; margin-bottom: 8px; text-transform: uppercase;'>🎯 Target</div>
+      <div style='font-size: 32px; font-weight: 800; color: #475569; margin-bottom: 4px;'>" & _formatted_target & "</div>
+      <div style='font-size: 13px; color: #64748B; font-weight: 500;'>Expected Goal</div>
+    </div>
+
+    <div style='
+      background: " & _status_bg & ";
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid " & _status_color & "20;
+      text-align: center;
+    '>
+      <div style='font-size: 12px; color: " & _status_color & "; font-weight: 600; margin-bottom: 8px; text-transform: uppercase;'>📈 Variance</div>
+      <div style='font-size: 28px; font-weight: 800; color: " & _status_color & "; margin-bottom: 4px;'>" & _diff_text & "</div>
+      <div style='font-size: 15px; color: " & _status_color & "; font-weight: 600;'>" & _variance_pct & "</div>
+    </div>
+  </div>
+
+  <div style='margin-bottom: 20px;'>
+    <div style='
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    '>
+      <span style='font-size: 15px; font-weight: 600; color: #334155;'>Progress to Target</span>
+      <span style='
+        font-size: 14px;
+        font-weight: 700;
+        color: " & _status_color & ";
+        background: " & _status_bg & ";
+        padding: 4px 12px;
+        border-radius: 12px;
+        border: 1px solid " & _status_color & "20;
+      '>" & FORMAT(_actual_pct * 100, "0.0") & "%</span>
+    </div>
+
+    <div style='
+      width: 100%;
+      height: 12px;
+      background: #F1F5F9;
+      border-radius: 6px;
+      position: relative;
+      overflow: hidden;
+    '>
+      <div class='animated-fill'></div>
+      <div style='
+        position: absolute;
+        left: " & _target_pct_css & ";
+        top: -1px;
+        bottom: -1px;
+        width: 3px;
+        background: #DC2626;
+        border-radius: 2px;
+        box-shadow: 0 0 4px rgba(220, 38, 38, 0.5);
+      '></div>
+      <div style='
+        position: absolute;
+        left: " & _target_pct_css & ";
+        top: -28px;
+        transform: translateX(-50%);
+        background: #DC2626;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 600;
+        white-space: nowrap;
+      '>TARGET</div>
+    </div>
+  </div>
+
+  <div style='
+    background: linear-gradient(135deg, " & _status_bg & " 0%, rgba(255,255,255,0.8) 100%);
+    border: 1px solid " & _status_color & "30;
+    border-radius: 12px;
+    padding: 16px 20px;
+  '>
+    <div style='font-size: 15px; font-weight: 600; color: #334155; margin-bottom: 4px;'>📋 Performance Analysis</div>
+    <div style='font-size: 14px; color: #475569; line-height: 1.5;'>
+      
+      <strong style='color: " & _status_color & ";'>" & _diff_text & " units</strong> 
+      " & IF(_actual >= _target, "above", "below") & " target 
+      (<strong style='color: " & _status_color & ";'>" & _variance_pct & "</strong>)
+    </div>
+  </div>
+
+</div>
+
+<style>
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+@keyframes fillBar {
+  from { width: 0%; }
+  to { width: " & _actual_pct_css & "; }
+}
+.animated-fill {
+  height: 100%;
+  background: " & _fill_gradient & ";
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+  animation: fillBar 1.5s ease-out forwards;
+}
+.animated-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  animation: shimmer 2s infinite;
+}
+</style>
+"
