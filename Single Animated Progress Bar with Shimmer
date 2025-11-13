@@ -1,0 +1,103 @@
+Bar Single = 
+VAR _bar_height = 15  // ← Variabel untuk tinggi bar (dalam px)
+VAR _actual = SELECTEDVALUE('Actual Table'[Actual])
+VAR _target = 100
+VAR _pct = DIVIDE(_actual, _target, 0)
+VAR _pct_capped = MIN(_pct, 1)  // ← Cap maksimal di 100%
+VAR _filled_width = _pct_capped * 100  // Width dalam persen
+VAR _category = [Selected Region]
+
+// Hitung posisi label persentase (dalam pixel, asumsi lebar total ~340px untuk 20 pills equivalent)
+VAR _total_width = 340  // Total width container
+VAR _pct_position = (_pct_capped * _total_width) - 10
+
+RETURN
+"
+<style>
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+@keyframes fillBar {
+  from { 
+    width: 0%;
+  }
+  to { 
+    width: " & _filled_width & "%;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.bar-container {
+  width: 100%;
+  height: " & _bar_height & "px;
+  background: #E8E8E8;
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  background: linear-gradient(to right, #7F6BD1 0%, #4DD5B6 80%, #4DD5B6 100%);
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+  animation: fillBar 1.5s ease-out forwards;
+  width: 0%;
+}
+
+.bar-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(255,255,255,0.3) 40%,
+    rgba(255,255,255,0.7) 50%, 
+    rgba(255,255,255,0.3) 60%,
+    transparent 100%
+  );
+  animation: shimmer 2.5s ease-in-out infinite 1.2s;
+}
+</style>
+
+<div style='font-family:Segoe UI,Arial,sans-serif;padding:10px;'>
+  <!-- Label persentase pencapaian di atas -->
+  <div style='position:relative;margin-bottom:8px;font-size:16px;height:22px;'>
+    <span style='
+        position:absolute;
+        left:" & _pct_position & "px;
+        font-weight:700;
+        color:" & IF(_pct > 1, "#00A651", "#333") & ";
+        transform:translateX(-50%);
+        animation: fadeIn 0.5s ease-out 1.2s both;
+    '>" & FORMAT(_pct, "0%") & "</span>
+  </div>
+  
+  <!-- Progress Bar -->
+  <div class='bar-container' style='margin-bottom:8px;'>
+    <div class='bar-fill'></div>
+  </div>
+  
+  <!-- Label 0% dan 100% di bawah bar -->
+  <div style='position:relative;margin-bottom:12px;font-size:16px;color:#666;height:18px;'>
+    <span style='position:absolute;left:0;font-weight:500;'>0%</span>
+    <span style='position:absolute;right:0;font-weight:500;color:#4b4453;'>100%</span>
+  </div>
+  
+  <!-- Footer -->
+  <div style='display:flex;justify-content:space-between;align-items:center;'>
+    <span style='font-size:18px;color:#666;font-weight:500;text-transform:uppercase;'>" & _category & "</span>
+    <span style='font-size:20px;color:#333;font-weight:600;'>$" & FORMAT(_actual, "#,0") & " / $" & FORMAT(_target, "#,0") & " K</span>
+  </div>
+</div>
+"
